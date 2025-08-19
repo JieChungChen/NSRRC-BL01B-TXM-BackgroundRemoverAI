@@ -15,6 +15,8 @@
    ```
    以上為確定可穩定運行的建議版本  
    其他版本的相容性請自行測試
+
+2. 下載模型權重`.pt`檔案並放置到`checkpoints`資料夾
    
 3. 執行`txm_image_correction_gui.py`
 
