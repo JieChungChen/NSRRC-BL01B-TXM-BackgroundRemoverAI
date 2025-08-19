@@ -4,12 +4,12 @@
 
 ## Quick Start  
 
-1. 使用pip安裝PyTorch及相關必要模組
-   PyTorch安裝
+1. 於`python-3.11`下使用pip安裝PyTorch及相關必要模組  
+   * PyTorch安裝
    ```
    pip install torch==2.3.1 torchvision==0.18.1 --index-url https://download.pytorch.org/whl/cu118
    ```
-   其餘模組安裝
+   * 其餘模組安裝
    ```
    pip install -r requirements.txt
    ```
