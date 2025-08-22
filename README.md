@@ -16,9 +16,10 @@
    以上為確定可穩定運行的建議版本  
    其他版本的相容性請自行測試
 
-2. 下載模型權重`.pt`檔案並放置到`checkpoints`資料夾
+2. 下載模型權重`.pt`檔案並放置到`checkpoints`資料夾  
+   下載連結: [Dropbox](https://nsrrcmail-my.sharepoint.com/:f:/g/personal/chen_jc_nsrrc_org_tw/Enu6xhnaPKVKmSFRM_5QbpoBmJYktVg5TBH66a-t4DFURQ?e=fdtP62)
    
-3. 執行`txm_image_correction_gui.py`
+4. 執行`txm_image_correction_gui.py`
 
 ## Demo  
 
