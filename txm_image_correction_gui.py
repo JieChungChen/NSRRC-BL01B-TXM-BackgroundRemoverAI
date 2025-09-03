@@ -79,6 +79,7 @@ class DiffusionGUI(QWidget):
         # Variables
         self.image_path = ""
         self.images = None
+        self.ref = None
         self.metadata = None
         self.current_index = 0
         self.viewer = None
@@ -109,8 +110,9 @@ class DiffusionGUI(QWidget):
 
     def load_raw_file(self, filepath):
         mode = 'tomo' if filepath.endswith('.txrm') else 'mosaic'
-        images, metadata, _ = read_txm_raw(filepath, mode=mode)
+        images, metadata, ref = read_txm_raw(filepath, mode=mode)
         self.images = images
+        self.ref = ref
         self.metadata = metadata
         self.scrollbar.setEnabled(True)
         self.scrollbar.setMinimum(0)
@@ -181,6 +183,11 @@ class DiffusionGUI(QWidget):
         self.eta_label.setText("完成 ✅")
 
         if self.metadata['mosaic_row'] > 1 and self.metadata['mosaic_column'] > 1:
+            if self.ref is not None:
+                raw_images = self.images / self.ref
+            else:
+                raw_images = self.images
+            save_mosaic(self.save_dir, raw_images=raw_images, n_cols=self.metadata['mosaic_column'], auto_contrast=False)
             save_mosaic(self.save_dir, n_cols=self.metadata['mosaic_column'], auto_contrast=True)
 
     def inference_failed(self, error_msg):
@@ -289,7 +296,7 @@ class InferenceThread(QThread):
                     torch.manual_seed(self.seed)
                     noise = torch.randn(size=[1, 1, 256, 256], device=self.device)
                     pred = sampler(input_imgs.unsqueeze(0), noise).squeeze().cpu().numpy()
-                    pred = pred / pred.max()
+                    pred = pred / pred.mean()
 
                     obj_pred_1 = input_1.squeeze().cpu().numpy() / pred * max_g
                     obj_pred_2 = input_2.squeeze().cpu().numpy() / pred * max_g

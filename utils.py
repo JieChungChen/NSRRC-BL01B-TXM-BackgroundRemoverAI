@@ -34,20 +34,28 @@ def split_mosaic(img: np.ndarray, rows: int, cols: int):
     return np.stack(patches)
 
 
-def save_mosaic(patch_dir, n_cols=3, auto_contrast=False):
+def save_mosaic(patch_dir, raw_images=None, n_cols=3, auto_contrast=False):
     files = sorted(glob.glob("%s/[!m]*.tif"%patch_dir))
     imgs = []
-    for f in files:
-        imgs.append(np.array(Image.open(f)))
-    imgs = np.array(imgs)
+
+    if raw_images is not None:
+        imgs = raw_images
+    else:
+        for f in files:
+            imgs.append(np.array(Image.open(f)))
+        imgs = np.array(imgs)
 
     size = imgs.shape[1]
     n_rows = len(imgs)//n_cols
-    mosaic = np.zeros((n_rows*size, n_cols*size))
+    mosaic_auto = np.zeros((n_rows*size, n_cols*size))
+    mosaic_orig = np.zeros((n_rows*size, n_cols*size))
     img_id = 0
     for i in reversed(range(n_rows)):
         for j in range(n_cols):
             im = imgs[img_id]
+
+            # no auto contrast
+            mosaic_orig[i*size:(i+1)*size, j*size:(j+1)*size] = im
 
             if auto_contrast:
                 if i!=(n_rows-1) or j!=0:
@@ -62,11 +70,19 @@ def save_mosaic(patch_dir, n_cols=3, auto_contrast=False):
                         diff.append(prev_b_avg/b_avg)
                     im = im*np.mean(diff)
                     imgs[img_id] = im
+                mosaic_auto[i*size:(i+1)*size, j*size:(j+1)*size] = im
 
-            img_id += 1 
-            mosaic[i*size:(i+1)*size, j*size:(j+1)*size] = im
+            img_id += 1   
 
-    save_path = f'{patch_dir}/mosaic.tif'
-    mosaic = min_max_percentile(mosaic, 0, 100)
-    Image.fromarray(mosaic).save(save_path)
-    return save_path
+    if raw_images is not None:
+        save_path = f'{patch_dir}/mosaic_from_raw.tif'
+    else:
+        save_path = f'{patch_dir}/mosaic_processed.tif'
+
+    mosaic_orig = min_max_percentile(mosaic_orig, 0, 100)
+    Image.fromarray(mosaic_orig).save(save_path)
+
+    if auto_contrast:
+        save_path = f'{patch_dir}/mosaic_processed(auto).tif'
+        mosaic_auto = min_max_percentile(mosaic_auto, 0, 100)
+        Image.fromarray(mosaic_auto).save(save_path)
